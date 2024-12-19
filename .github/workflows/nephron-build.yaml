@@ -1,0 +1,25 @@
+---
+name: nephron-build
+run-name: Build Nephron tool for scaling flows
+on:
+  push:
+  workflow_dispatch:
+
+## Build and create the project on every push to the project
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container:
+      image: quay.io/bluebird/java-builder:0.1.2.jdk-11.b2
+    steps:
+      - uses: actions/checkout@v4
+      - name: Add workspace to git safe.directory
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+      - name: Build plugin from source
+        run: |
+          make
+      - name: Publish Test Report
+        if: success() || failure()
+        uses: scacap/action-surefire-report@v1
+        with:
+          check_name: Test Report
